@@ -1,0 +1,11 @@
+---- Setup ----
+In Chrome browser, type "chrome://flags" into the address bar. Then enable "Experimental Web Platform features".
+In a terminal, go to the "node-website" folder. If needed, install dependencies with "npm install".
+Start the website with "npm start". Navigate to http://localhost:6060/
+When ready to run the system, press the "login" button.
+If your arduino is connected to the computer, you should see it in the dropdown. Select it.
+
+
+---- Notes ----
+You may need to refresh the page after each attempt, but I don't remember for sure.
+It is advised to open the console while running it as there is a lot of debugging print outs.
