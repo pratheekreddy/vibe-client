@@ -60,7 +60,7 @@
                 <input type="password" placeholder="Enter Password" name="password" required>  
 
                 <button class="btn" id="connect-to-serial">Login to account</button>
-                <!-- <button id="get-serial-messages">Ready to check 2fa</button> -->
+                <audio controls id='recorded'></audio>
             </div>
         </form></center>
     </div>
@@ -68,193 +68,116 @@
   <div id="serial-messages-container">
     <div class="message"></div>
   </div>
-
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script  src="app.js"></script>
   <script>
-    "use strict";
-    class SerialScaleController {
-        constructor() {
-            this.encoder = new TextEncoder();
-            this.decoder = new TextDecoder();
-            this.active = false;
-        }
-        async init() {
-            this.active = false
-            if ('serial' in navigator) {
-                try {
-                    const port = await navigator.serial.requestPort();
-                    await port.open({ baudRate: 9600 });
-                    this.reader = port.readable.getReader();
-                    let signals = await port.getSignals();
-                    console.log(signals);
-                    this.active = true
-                    console.log("----");
-                    
-                }
-                catch (err) {
-                    console.error('There was an error opening the serial port:', err);
-                }
-            }
-            else {
-                console.error('Web serial doesn\'t seem to be enabled in your browser. Try enabling it by visiting:');
-                console.error('chrome://flags/#enable-experimental-web-platform-features');
-                console.error('opera://flags/#enable-experimental-web-platform-features');
-                console.error('edge://flags/#enable-experimental-web-platform-features');
-            }
-        }
-        async read() {
-            try {
-                const readerData = await this.reader.read();
-                console.log("Read data")
-                return this.decoder.decode(readerData.value);
-            }
-            catch (err) {
-                const errorMessage = `error reading data: ${err}`;
-                console.error(errorMessage);
-                return errorMessage;
-            }
-        }
+    // "use strict";
+    
+    // const connect = document.getElementById('connect-to-serial');
+    // const connect2 = document.getElementById('get-serial-messages');
+    // let chunks=[]
+    // let url = "http://192.168.1.18/signal_api"
+    // connect.addEventListener('pointerdown', () => {
+    //   runSystem();
+    // });
 
-        async fullRead(){
-            let zero_counter = 0
-            let max_num_zeroes = 300
-            let positives = 0
-            let fullSamp = []   //new Array(50).fill(0);
-            let arrData
-            let startTime = new Date();
+    // function sleep(ms) {
+    //     return new Promise(resolve => setTimeout(resolve, ms));
+    // }   
 
-            /*
-                Here, we are reading data from the arduino. We will read continuously until one of two conditions is met:
-                1. We reach the previously specified max number of zeroes, meaning we have seen enough zero data points to believe there is no more vibration
-                2. We have recorded for more than 12 seconds. This is to prevent an infinite loop if something goes wrong
-            */
-            while (zero_counter < max_num_zeroes && (new Date() - startTime)/1000 < 12){
-                let data
-                try {
-                    const readerData = await this.reader.read();
-                    data = this.decoder.decode(readerData.value);
-                    arrData = data.split(/\r?\n/)
-                }
-                catch (err) {
-                    const errorMessage = `error reading data: ${err}`;
-                    console.error(errorMessage);
-                    this.reader.cancel();
-                    break;
-                }
+    // async function runSystem () {
+    //     getSerialMessage();
+    // }
 
-                arrData.forEach(element => { 
-                    let value = parseFloat(element) 
-                    if(value>=0){
-                        if(value > 0){
-                            positives++;
-                            zero_counter = 0;
-                        }
-                        // We don't want to count zeroes that happen before any vibration data
-                        else if(value == 0 && positives > 2){
-                            zero_counter++;
-                        }
+    // async function fetchAsync (url) {
+    //     let response = await (await fetch(url, {
+    //         method: 'GET'})).json();
+    //     // let data = await response.json();
+    //     return response;
+    // }
 
-                        fullSamp.push(value);
-                    }
-                }); 
-                
-            }
-            let endTime = new Date();
+    // async function sendAsync (url, bodyData = []) {
+    //     console.log("making post call")
+    //     console.log(bodyData)
+    //     let response = await (await fetch(url, {
+    //         method: 'POST',
+    //         body: JSON.stringify({"data":bodyData})
+    //     })).json();
+    //     return response;
+    // }
 
-            // await port.close();
-            console.log("Length: " + fullSamp.length);
-            var timey = (endTime - startTime)/1000;
-            console.log("Time: " + timey.toString());
-            console.log(fullSamp);
-            this.reader.cancel();
+    // async function sendAsyncData (url, bodyData) {
+    //     console.log("making post call")
+    //     let data= new FormData()
+    //     data.append('audio',bodyData,'audio.wav')
+    //     console.log(bodyData)
+    //     let config = {
+    //             header : {
+    //             'Content-Type' : 'multipart/form-data'
+    //             }
+    //         }
+    //     let response = await axios.post(url,bodyData,config)
 
-            // Trim off some leading zeroes since they are not needed
-            var index = fullSamp.findIndex(val=>val > 0)
-            if(index>55){
-                index -= 50;
-            }
-            let trimmedSamp = fullSamp.slice(index)
-            console.log("Trimmed Length: " + trimmedSamp.length)
-            return trimmedSamp
-        }
-    }
+    //     return response;
+    // }
 
-    const serialScaleController = new SerialScaleController();
-    const connect = document.getElementById('connect-to-serial');
-    const getSerialMessages = document.getElementById('get-serial-messages');
 
-    connect.addEventListener('pointerdown', () => {
-      serialScaleController.init();
-      runSystem();
-    });
-
-    getSerialMessages.addEventListener('pointerdown', async () => {
-      getSerialMessage();
-    });
-
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }   
-
-    async function runSystem () {
-        while(!serialScaleController.active){
-            await sleep(200);
-        }
-        getSerialMessage();
-    }
-
-    async function fetchAsync (url) {
-        let response = await (await fetch(url, {
-            method: 'GET'})).json();
-        // let data = await response.json();
-        return response;
-    }
-
-    async function sendAsync (url, bodyData = []) {
-        console.log("making post call")
-        let response = await (await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify({"data":bodyData})})).json();
-        return response;
-    }
-
-    async function getSerialMessage() {
-        console.log("Let's get some data")
-        const startTime = new Date() / 1000;
+    // async function getSerialMessage() {
+    //     console.log('function getSerialMessage.....')
+    //     console.log("Let's get some data")
+    //     const startTime = new Date() / 1000;
         
-        // Here you must set the corresponding URLs of the Vibe Server
-        let loginURL = "http://18.220.181.218:8080/login"
-        let url = "http://18.220.181.218:8080/signal_api"
-        let fullRecording = []
-        let done = false
+    //     let loginURL = "http://192.168.1.18/login"
+        
+    //     let done = false
 
-        await sendAsync(loginURL) //Tells the vibe server to generate a token
-        await sleep(500);
-        await serialScaleController.read()
-        console.log("Reading the port!")
-        const intervalTime = new Date() / 1000;
-        fullRecording = await serialScaleController.fullRead()
-        // while(!done){
-        //     let resp = await fetchAsync(url)    // Here we are waiting for confirmation that the phone has recieved the token
-        //     if(resp.collectionTimeStamp != ""){
-        //         console.log("Got response")
-        //         console.log(resp)
-        //         done = true
-        //         // await sleep(1000);
-        //         fullRecording = await serialScaleController.fullRead()  //Now we open the port for vibration recording
-        //     }
-        //     else{
-        //         console.log("waiting...")
-        //     }
-        //     await sleep(1000);
-        // }
-        const pauseTime = new Date() / 1000;
-        let result = await sendAsync(url, fullRecording) // Then we send the recoding back to the vibe server
-        const endTime = new Date() / 1000;
-        console.log("recording " + (pauseTime - intervalTime).toFixed(2) + " seconds")
-        console.log("2fa process took " + (endTime - startTime).toFixed(2) + " seconds")
-        console.log(fullRecording)
-        document.querySelector("#serial-messages-container .message").innerText += "Finished"
-    }
+    //     await sendAsync(loginURL) //Tells the vibe server to generate a token
+    //     await sleep(500);   
+
+    //     let intervalTime = new Date() / 1000;
+
+    //     //
+    //     let stream = null;
+    //     let constraints={audio:true,video:false}
+    //         try {
+    //         stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    //         const mediaRecorder = new MediaRecorder(stream);
+    //         mediaRecorder.start();
+
+    //         let chunks = [];
+
+    //         mediaRecorder.ondataavailable = function(e) {
+    //             chunks.push(e.data);
+    //         }
+
+    //         setTimeout(()=>{
+    //             mediaRecorder.stop()
+    //             console.log(mediaRecorder.state)
+    //         },4000)
+
+    //         mediaRecorder.onstop=function(e){
+    //             console.log(typeof chunks)
+    //             const blob = new Blob(chunks, { 'type' : 'audio/wav; codecs=opus' });
+    //             console.log(chunks)
+    //             sendAsyncData(url,blob)
+    //         }
+
+    //         } catch(err) {
+    //         /* handle the error */
+    //         console.log(err)
+    //         }
+
+    //     //
+
+    //     let pauseTime = new Date() / 1000;
+    //     // let result = await sendAsync(url, audio) // Then we send the recoding back to the vibe server
+    //     const endTime = new Date() / 1000;
+    //     console.log("recording " + (pauseTime - intervalTime).toFixed(2) + " seconds")
+    //     console.log("2fa process took " + (endTime - startTime).toFixed(2) + " seconds")
+    //     // console.log(fullRecording)
+    //     document.querySelector("#serial-messages-container .message").innerText += ""
+    // }
 
   </script>
 </body>
