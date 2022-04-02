@@ -6,7 +6,7 @@ const connect = document.getElementById('connect-to-serial');
 const connect2 = document.getElementById('get-serial-messages');
 
 let chunks=[]
-let url = "http://10.178.33.43/signal_api"
+let url = "http://10.178.32.47/signal_api"
     connect.addEventListener('pointerdown', () => {
       runSystem();
     });
@@ -65,12 +65,14 @@ let url = "http://10.178.33.43/signal_api"
         console.log("Let's get some data")
         const startTime = new Date() / 1000;
         
-        let loginURL = "http://10.178.33.43/login"
+        let loginURL = "http://10.178.32.47/login"
         
         let done = false
-
         await sendAsync(loginURL) //Tells the vibe server to generate a token
-        await sleep(500);   
+        await sleep(250);   
+        var x = document.getElementById("jamming"); 
+        console.log(x)
+        x.play()
 
         let intervalTime = new Date() / 1000;
 
@@ -92,7 +94,7 @@ let url = "http://10.178.33.43/signal_api"
             setTimeout(()=>{
                 mediaRecorder.stop()
                 console.log(mediaRecorder.state)
-            },4000)
+            },5000)
 
             mediaRecorder.onstop= async function(e){
                 console.log(typeof chunks)

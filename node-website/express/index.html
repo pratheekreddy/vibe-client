@@ -60,7 +60,9 @@
                 <input type="password" placeholder="Enter Password" name="password" required>  
 
                 <button class="btn" id="connect-to-serial">Login to account</button>
-                <audio controls id='recorded'></audio>
+                <audio controls id='jamming'>
+                  <source src="./jamming.wav" type="audio/wav">
+                </audio>
             </div>
         </form></center>
     </div>
@@ -70,115 +72,5 @@
   </div>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script  src="app.js"></script>
-  <script>
-    // "use strict";
-    
-    // const connect = document.getElementById('connect-to-serial');
-    // const connect2 = document.getElementById('get-serial-messages');
-    // let chunks=[]
-    // let url = "http://192.168.1.18/signal_api"
-    // connect.addEventListener('pointerdown', () => {
-    //   runSystem();
-    // });
-
-    // function sleep(ms) {
-    //     return new Promise(resolve => setTimeout(resolve, ms));
-    // }   
-
-    // async function runSystem () {
-    //     getSerialMessage();
-    // }
-
-    // async function fetchAsync (url) {
-    //     let response = await (await fetch(url, {
-    //         method: 'GET'})).json();
-    //     // let data = await response.json();
-    //     return response;
-    // }
-
-    // async function sendAsync (url, bodyData = []) {
-    //     console.log("making post call")
-    //     console.log(bodyData)
-    //     let response = await (await fetch(url, {
-    //         method: 'POST',
-    //         body: JSON.stringify({"data":bodyData})
-    //     })).json();
-    //     return response;
-    // }
-
-    // async function sendAsyncData (url, bodyData) {
-    //     console.log("making post call")
-    //     let data= new FormData()
-    //     data.append('audio',bodyData,'audio.wav')
-    //     console.log(bodyData)
-    //     let config = {
-    //             header : {
-    //             'Content-Type' : 'multipart/form-data'
-    //             }
-    //         }
-    //     let response = await axios.post(url,bodyData,config)
-
-    //     return response;
-    // }
-
-
-    // async function getSerialMessage() {
-    //     console.log('function getSerialMessage.....')
-    //     console.log("Let's get some data")
-    //     const startTime = new Date() / 1000;
-        
-    //     let loginURL = "http://192.168.1.18/login"
-        
-    //     let done = false
-
-    //     await sendAsync(loginURL) //Tells the vibe server to generate a token
-    //     await sleep(500);   
-
-    //     let intervalTime = new Date() / 1000;
-
-    //     //
-    //     let stream = null;
-    //     let constraints={audio:true,video:false}
-    //         try {
-    //         stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-    //         const mediaRecorder = new MediaRecorder(stream);
-    //         mediaRecorder.start();
-
-    //         let chunks = [];
-
-    //         mediaRecorder.ondataavailable = function(e) {
-    //             chunks.push(e.data);
-    //         }
-
-    //         setTimeout(()=>{
-    //             mediaRecorder.stop()
-    //             console.log(mediaRecorder.state)
-    //         },4000)
-
-    //         mediaRecorder.onstop=function(e){
-    //             console.log(typeof chunks)
-    //             const blob = new Blob(chunks, { 'type' : 'audio/wav; codecs=opus' });
-    //             console.log(chunks)
-    //             sendAsyncData(url,blob)
-    //         }
-
-    //         } catch(err) {
-    //         /* handle the error */
-    //         console.log(err)
-    //         }
-
-    //     //
-
-    //     let pauseTime = new Date() / 1000;
-    //     // let result = await sendAsync(url, audio) // Then we send the recoding back to the vibe server
-    //     const endTime = new Date() / 1000;
-    //     console.log("recording " + (pauseTime - intervalTime).toFixed(2) + " seconds")
-    //     console.log("2fa process took " + (endTime - startTime).toFixed(2) + " seconds")
-    //     // console.log(fullRecording)
-    //     document.querySelector("#serial-messages-container .message").innerText += ""
-    // }
-
-  </script>
 </body>
 </html>
